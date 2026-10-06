@@ -1,0 +1,2054 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Xác minh chứng chỉ Blockchain</title>
+
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Ethers -->
+    <script src="https://cdn.jsdelivr.net/npm/ethers@6.15.0/dist/ethers.umd.min.js"></script>
+
+    <!-- QR Scanner -->
+    <script src="https://unpkg.com/html5-qrcode"></script>
+
+    <!-- Project JS -->
+    <script src="./js/config.js"></script>
+    <script src="./js/hash.js"></script>
+    <script src="./js/certificate.js"></script>
+    <script src="./js/blockchain.js"></script>
+
+    <style>
+
+        #reader video {
+
+            width: 100% !important;
+            height: auto !important;
+
+            object-fit: cover !important;
+
+            border-radius: 12px;
+
+        }
+
+        #reader {
+
+            width: 100% !important;
+
+            border: none !important;
+
+        }
+
+    </style>
+
+</head>
+
+
+<body class="bg-slate-950 text-slate-100 min-h-screen">
+
+
+<div class="max-w-2xl mx-auto px-4 py-10">
+
+
+    <!-- ================================================= -->
+    <!-- HEADER -->
+    <!-- ================================================= -->
+
+    <div class="text-center mb-8">
+
+        <div class="text-5xl mb-4">
+            🎓
+        </div>
+
+        <h1 class="text-3xl font-extrabold text-amber-400">
+
+            Xác minh chứng chỉ
+
+        </h1>
+
+        <p class="text-slate-400 mt-2">
+
+            Kiểm tra tính toàn vẹn và trạng thái
+            chứng chỉ trên Blockchain
+
+        </p>
+
+    </div>
+
+
+
+    <!-- ================================================= -->
+    <!-- 1. QUÉT QR CAMERA -->
+    <!-- ================================================= -->
+
+    <div class="bg-slate-900
+                border border-slate-800
+                rounded-2xl
+                p-5
+                mb-5">
+
+        <h2 class="text-lg font-bold mb-3">
+
+            📷 Quét mã QR
+
+        </h2>
+
+
+        <div id="cameraPlaceholder"
+             class="border-2
+                    border-dashed
+                    border-slate-700
+                    rounded-xl
+                    p-8
+                    text-center
+                    mb-4">
+
+            <div class="text-4xl mb-3">
+                📷
+            </div>
+
+            <p class="text-slate-400 text-sm">
+
+                Sử dụng camera để quét QR
+                trên chứng chỉ
+
+            </p>
+
+        </div>
+
+
+        <div id="readerWrapper"
+             class="hidden
+                    overflow-hidden
+                    rounded-xl
+                    mb-4
+                    bg-black">
+
+            <div id="reader"></div>
+
+        </div>
+
+
+        <button
+            id="cameraButton"
+            onclick="toggleCamera()"
+            class="w-full
+                   bg-blue-600
+                   hover:bg-blue-500
+                   py-3
+                   rounded-xl
+                   font-bold">
+
+            📷 Mở camera
+
+        </button>
+
+    </div>
+
+
+
+    <!-- ================================================= -->
+    <!-- 2. CHỌN ẢNH QR -->
+    <!-- ================================================= -->
+
+    <div class="bg-slate-900
+                border border-slate-800
+                rounded-2xl
+                p-5
+                mb-5">
+
+        <h2 class="text-lg font-bold mb-3">
+
+            🖼️ Quét QR từ ảnh
+
+        </h2>
+
+
+        <p class="text-slate-500 text-sm mb-3">
+
+            Bạn cũng có thể chọn ảnh QR
+            đã lưu trên máy hoặc điện thoại.
+
+        </p>
+
+
+        <input
+            type="file"
+            id="qrFileInput"
+            accept="image/*"
+            onchange="scanQrFromImage(event)"
+            class="block
+                   w-full
+                   text-sm
+                   text-slate-400
+
+                   file:mr-4
+                   file:py-2
+                   file:px-4
+
+                   file:rounded-lg
+                   file:border-0
+
+                   file:bg-slate-700
+                   file:text-amber-400
+
+                   hover:file:bg-slate-600
+                   cursor-pointer"
+        >
+
+    </div>
+
+
+
+    <!-- ================================================= -->
+    <!-- 3. TẢI JSON -->
+    <!-- ================================================= -->
+
+    <div class="bg-slate-900
+                border border-slate-800
+                rounded-2xl
+                p-5
+                mb-5">
+
+        <h2 class="text-lg font-bold mb-3">
+
+            📁 Tải file chứng chỉ JSON
+
+        </h2>
+
+
+        <p class="text-slate-500 text-sm mb-3">
+
+            Chọn file certificate JSON
+            để tính lại SHA-256 và kiểm tra Blockchain.
+
+        </p>
+
+
+        <input
+            type="file"
+            id="jsonFileInput"
+            accept=".json,application/json"
+            onchange="verifyUploadedJson(event)"
+            class="block
+                   w-full
+                   text-sm
+                   text-slate-400
+
+                   file:mr-4
+                   file:py-2
+                   file:px-4
+
+                   file:rounded-lg
+                   file:border-0
+
+                   file:bg-amber-500
+                   file:text-slate-950
+
+                   file:font-bold
+
+                   hover:file:bg-amber-400
+                   cursor-pointer"
+        >
+
+    </div>
+
+
+
+    <!-- ================================================= -->
+    <!-- 4. NHẬP CERTIFICATE ID -->
+    <!-- ================================================= -->
+
+    <div class="bg-slate-900
+                border border-slate-800
+                rounded-2xl
+                p-5">
+
+        <h2 class="text-lg font-bold mb-3">
+
+            🔎 Nhập Certificate ID
+
+        </h2>
+
+
+        <input
+            id="certIdInput"
+            type="text"
+            placeholder="Ví dụ: SV2026001"
+            autocomplete="off"
+
+            class="w-full
+                   bg-slate-950
+                   border border-slate-700
+                   p-3
+                   rounded-xl
+                   outline-none
+
+                   focus:border-amber-500
+
+                   font-mono
+                   text-white"
+        >
+
+
+        <button
+            onclick="verifyById()"
+
+            class="w-full
+                   mt-3
+                   bg-amber-500
+                   hover:bg-amber-400
+                   text-slate-950
+                   font-bold
+                   py-3
+                   rounded-xl">
+
+            🔎 Xác minh chứng chỉ
+
+        </button>
+
+    </div>
+
+
+
+    <!-- ================================================= -->
+    <!-- LOADING -->
+    <!-- ================================================= -->
+
+    <div id="loading"
+         class="hidden
+                text-center
+                mt-6
+                p-4
+                text-amber-400
+                font-semibold">
+
+        ⏳ Đang xác minh chứng chỉ...
+
+    </div>
+
+
+
+    <!-- ================================================= -->
+    <!-- RESULT -->
+    <!-- ================================================= -->
+
+    <div id="result"
+         class="hidden
+                mt-6">
+
+
+        <!-- STATUS -->
+
+        <div id="statusBanner"
+             class="p-5
+                    rounded-xl
+                    text-center
+                    font-bold
+                    text-lg
+                    mb-5">
+
+        </div>
+
+
+
+        <!-- ================================================= -->
+        <!-- THÔNG TIN CERTIFICATE -->
+        <!-- ================================================= -->
+
+        <div id="certificateInfo"
+             class="bg-slate-900
+                    border border-slate-800
+                    rounded-2xl
+                    p-5
+                    mb-5">
+
+
+            <h2 class="text-amber-400
+                       font-bold
+                       text-lg
+                       mb-4
+                       border-b
+                       border-slate-800
+                       pb-3">
+
+                📜 Thông tin chứng chỉ
+
+            </h2>
+
+
+            <div class="divide-y divide-slate-800/80 rounded-xl bg-slate-900/40 p-2 border border-slate-800">
+
+    <!-- Mã chứng chỉ -->
+    <div class="flex items-center justify-between p-3">
+        <span class="text-slate-400 text-sm font-medium">Mã chứng chỉ</span>
+        <div id="displayCertId" class="font-mono text-amber-400 font-bold text-sm bg-amber-400/10 px-2.5 py-1 rounded border border-amber-400/20 break-all">
+        </div>
+    </div>
+
+    <!-- Họ và tên -->
+    <div class="flex items-center justify-between p-3">
+        <span class="text-slate-400 text-sm font-medium">Họ và tên</span>
+        <div id="displayName" class="font-semibold text-white text-sm text-right">
+        </div>
+    </div>
+
+    <!-- Bằng cấp -->
+    <div class="flex items-center justify-between p-3">
+        <span class="text-slate-400 text-sm font-medium">Bằng cấp</span>
+        <div id="displayDegree" class="text-slate-200 text-sm font-medium text-right">
+        </div>
+    </div>
+
+    <!-- Cơ quan phát hành -->
+    <div class="flex items-center justify-between p-3">
+        <span class="text-slate-400 text-sm font-medium">Cơ quan phát hành</span>
+        <div id="displayIssuer" class="text-slate-200 text-sm font-medium text-right">
+        </div>
+    </div>
+
+    <!-- Ngày cấp (Đã sửa lại chữ to hơn, sáng rõ hơn) -->
+    <div class="flex items-center justify-between p-3 bg-slate-800/30 rounded-lg my-1">
+        <span class="text-slate-300 text-sm font-semibold">Ngày cấp</span>
+        <div id="displayIssueDate" class="font-mono text-amber-300 font-bold text-sm text-right">
+        </div>
+    </div>
+
+</div>
+
+
+
+        <!-- ================================================= -->
+        <!-- BLOCKCHAIN RESULT -->
+        <!-- ================================================= -->
+
+        <div id="blockchainInfo"
+             class="bg-slate-900
+                    border border-slate-800
+                    rounded-2xl
+                    p-5
+                    mb-5">
+
+
+            <h2 class="text-amber-400
+                       font-bold
+                       text-lg
+                       mb-4
+                       border-b
+                       border-slate-800
+                       pb-3">
+
+                ⛓️ Dữ liệu Blockchain
+
+            </h2>
+
+
+            <div class="space-y-4">
+
+
+                <div>
+
+                    <div class="text-slate-500 text-sm">
+                        SHA-256 của certificate
+                    </div>
+
+                    <div id="displayHash"
+                         class="font-mono
+                                text-xs
+                                text-emerald-400
+                                break-all
+                                bg-slate-950
+                                p-3
+                                rounded-lg
+                                mt-1">
+
+                    </div>
+
+                </div>
+
+
+
+                <div>
+
+                    <div class="text-slate-500 text-sm">
+                        Hash lưu trên Blockchain
+                    </div>
+
+                    <div id="displayOnChainHash"
+                         class="font-mono
+                                text-xs
+                                text-blue-400
+                                break-all
+                                bg-slate-950
+                                p-3
+                                rounded-lg
+                                mt-1">
+
+                    </div>
+
+                </div>
+
+
+
+                <div>
+
+                    <div class="text-slate-500 text-sm">
+                        Issuer Wallet
+                    </div>
+
+                    <div id="displayIssuerWallet"
+                         class="font-mono
+                                text-xs
+                                text-sky-400
+                                break-all
+                                bg-slate-950
+                                p-3
+                                rounded-lg
+                                mt-1">
+
+                    </div>
+
+                </div>
+
+
+
+                <div>
+
+                    <div class="text-slate-500 text-sm">
+                        Thời gian phát hành
+                    </div>
+
+                    <div id="displayIssuedAt">
+
+                    </div>
+
+                </div>
+
+
+
+                <div>
+
+                    <div class="text-slate-500 text-sm">
+                        Trạng thái thu hồi
+                    </div>
+
+                    <div id="displayRevoked"
+                         class="font-bold">
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- ================================================= -->
+        <!-- CÁC BƯỚC XÁC MINH -->
+        <!-- ================================================= -->
+
+        <div class="bg-slate-900
+                    border border-slate-800
+                    rounded-2xl
+                    p-5
+                    mb-5">
+
+
+            <h2 class="text-amber-400
+                       font-bold
+                       text-lg
+                       mb-4">
+
+                ⚙️ Quá trình xác minh
+
+            </h2>
+
+
+            <div id="stepList"
+                 class="space-y-2
+                        text-sm
+                        font-mono">
+
+            </div>
+
+        </div>
+
+
+
+        <!-- ================================================= -->
+        <!-- RAW JSON -->
+        <!-- ================================================= -->
+
+        <details
+            class="bg-slate-900
+                   border border-slate-800
+                   rounded-2xl
+                   p-5
+                   mb-5">
+
+
+            <summary
+                class="cursor-pointer
+                       text-slate-400
+                       hover:text-amber-400
+                       font-semibold">
+
+                🔍 Xem dữ liệu JSON
+
+            </summary>
+
+
+            <pre
+                id="rawJson"
+                class="mt-4
+                       bg-slate-950
+                       p-4
+                       rounded-xl
+                       text-xs
+                       font-mono
+                       text-slate-300
+                       overflow-auto
+                       max-h-96">
+            </pre>
+
+        </details>
+
+
+
+        <!-- ================================================= -->
+        <!-- RESET -->
+        <!-- ================================================= -->
+
+        <button
+            onclick="resetVerification()"
+
+            class="w-full
+                   bg-slate-800
+                   hover:bg-slate-700
+                   border border-slate-700
+                   py-3
+                   rounded-xl
+                   font-bold">
+
+            🔄 Xác minh chứng chỉ khác
+
+        </button>
+
+    </div>
+
+
+
+    <!-- ================================================= -->
+    <!-- BACK HOME -->
+    <!-- ================================================= -->
+
+    <div class="text-center mt-8">
+
+        <a href="index.html"
+           class="text-slate-500
+                  hover:text-amber-400">
+
+            ← Về trang chủ
+
+        </a>
+
+    </div>
+
+</div>
+
+
+
+<script>
+
+
+/* =====================================================
+   BIẾN TOÀN CỤC
+===================================================== */
+
+let html5QrCode = null;
+
+let isCameraRunning = false;
+
+
+
+/* =====================================================
+   HÀM TIỆN ÍCH
+===================================================== */
+
+function setText(id, value) {
+
+    const element =
+        document.getElementById(id);
+
+    if (element) {
+
+        element.innerText =
+            value ?? "—";
+
+    }
+
+}
+
+
+
+/* =====================================================
+   HIỂN THỊ LOADING
+===================================================== */
+
+function showLoading() {
+
+    document
+        .getElementById("loading")
+        .classList.remove("hidden");
+
+
+    document
+        .getElementById("result")
+        .classList.add("hidden");
+
+}
+
+
+
+/* =====================================================
+   ẨN LOADING
+===================================================== */
+
+function hideLoading() {
+
+    document
+        .getElementById("loading")
+        .classList.add("hidden");
+
+}
+
+
+
+/* =====================================================
+   LOG TỪNG BƯỚC
+===================================================== */
+
+function addStep(
+    text,
+    type = "loading"
+) {
+
+    const stepList =
+        document.getElementById(
+            "stepList"
+        );
+
+
+    const item =
+        document.createElement("div");
+
+
+    if (type === "success") {
+
+        item.className =
+            "text-emerald-400 " +
+            "bg-emerald-500/5 " +
+            "p-2 rounded-lg";
+
+
+        item.innerText =
+            "✅ " + text;
+
+    }
+
+    else if (type === "error") {
+
+        item.className =
+            "text-rose-400 " +
+            "bg-rose-500/5 " +
+            "p-2 rounded-lg";
+
+
+        item.innerText =
+            "❌ " + text;
+
+    }
+
+    else if (type === "warning") {
+
+        item.className =
+            "text-amber-400 " +
+            "bg-amber-500/5 " +
+            "p-2 rounded-lg";
+
+
+        item.innerText =
+            "⚠️ " + text;
+
+    }
+
+    else {
+
+        item.className =
+            "text-slate-400 " +
+            "bg-slate-950 " +
+            "p-2 rounded-lg";
+
+
+        item.innerText =
+            "⏳ " + text;
+
+    }
+
+
+    stepList.appendChild(item);
+
+}
+
+
+
+/* =====================================================
+   HIỂN THỊ RESULT
+===================================================== */
+
+function showResult() {
+
+    document
+        .getElementById("result")
+        .classList.remove("hidden");
+
+}
+
+
+
+/* =====================================================
+   HIỂN THỊ LỖI
+===================================================== */
+
+function showError(message) {
+
+    hideLoading();
+
+    showResult();
+
+
+    const banner =
+        document.getElementById(
+            "statusBanner"
+        );
+
+
+    banner.className =
+        "p-5 rounded-xl text-center " +
+        "font-bold text-lg " +
+        "bg-rose-500/20 " +
+        "border border-rose-500/40 " +
+        "text-rose-400";
+
+
+    banner.innerText =
+        "❌ " + message;
+
+
+    document
+        .getElementById(
+            "certificateInfo"
+        )
+        .classList.add("hidden");
+
+
+    document
+        .getElementById(
+            "blockchainInfo"
+        )
+        .classList.add("hidden");
+
+
+    document
+        .getElementById(
+            "stepList"
+        )
+        .innerHTML = "";
+
+}
+
+
+
+/* =====================================================
+   XÁC MINH THEO CERTIFICATE ID
+===================================================== */
+
+async function verifyById() {
+
+    const certId =
+        document
+            .getElementById(
+                "certIdInput"
+            )
+            .value
+            .trim();
+
+
+    if (!certId) {
+
+        alert(
+            "Vui lòng nhập Certificate ID!"
+        );
+
+        return;
+
+    }
+
+
+    try {
+
+        showLoading();
+
+
+        addStep(
+            "Đang tìm certificate..."
+        );
+
+
+        const response =
+            await fetch(
+                "./certificates/" +
+                encodeURIComponent(certId) +
+                ".json"
+            );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                "Không tìm thấy file certificate."
+            );
+
+        }
+
+
+        const certificateData =
+            await response.json();
+
+
+        await verifyCertificate(
+            certificateData
+        );
+
+
+    }
+
+    catch (error) {
+
+        console.error(error);
+
+        showError(
+            error.message ||
+            "Không thể xác minh certificate."
+        );
+
+    }
+
+    finally {
+
+        hideLoading();
+
+    }
+
+}
+
+
+
+/* =====================================================
+   XÁC MINH FILE JSON UPLOAD
+===================================================== */
+
+async function verifyUploadedJson(event) {
+
+    const file =
+        event.target.files[0];
+
+
+    if (!file) return;
+
+
+    try {
+
+        showLoading();
+
+
+        addStep(
+            "Đang đọc file JSON..."
+        );
+
+
+        const text =
+            await file.text();
+
+
+        let certificateData;
+
+
+        try {
+
+            certificateData =
+                JSON.parse(text);
+
+        }
+
+        catch {
+
+            throw new Error(
+                "File không phải JSON hợp lệ."
+            );
+
+        }
+
+
+        await verifyCertificate(
+            certificateData,
+            text
+        );
+
+    }
+
+    catch (error) {
+
+        console.error(error);
+
+        showError(
+            error.message
+        );
+
+    }
+
+    finally {
+
+        hideLoading();
+
+    }
+
+}
+
+
+
+/* =====================================================
+   HÀM XÁC MINH CHÍNH
+===================================================== */
+
+async function verifyCertificate(
+    certificateData,
+    rawText = null
+) {
+
+    /*
+        1. KIỂM TRA CẤU TRÚC
+    */
+
+    if (!certificateData) {
+
+        throw new Error(
+            "Certificate không có dữ liệu."
+        );
+
+    }
+
+
+    const certId =
+        certificateData.certificateId;
+
+
+    if (!certId) {
+
+        throw new Error(
+            "Certificate không có certificateId."
+        );
+
+    }
+
+
+    addStep(
+        "Certificate ID: " + certId,
+        "success"
+    );
+
+
+    /*
+        2. HIỂN THỊ JSON
+    */
+
+    document
+        .getElementById("rawJson")
+        .innerText =
+            rawText ||
+            JSON.stringify(
+                certificateData,
+                null,
+                2
+            );
+
+
+    /*
+        3. HIỂN THỊ THÔNG TIN
+    */
+
+    setText(
+        "displayCertId",
+        certId
+    );
+
+
+    setText(
+        "displayName",
+        certificateData.studentName
+    );
+
+
+    setText(
+        "displayDegree",
+        certificateData.degree
+    );
+
+
+    setText(
+        "displayIssuer",
+        certificateData.issuer
+    );
+
+
+    setText(
+    "displayIssueDate",
+    new Date(certificateData.issueDate).toLocaleString("vi-VN", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit"
+    }).replace(",", " -")
+);
+
+    /*
+        4. CANONICAL JSON
+    */
+
+    addStep(
+        "Đang chuẩn hóa dữ liệu certificate..."
+    );
+
+
+    if (
+        typeof canonicalizeCertificate
+        !== "function"
+    ) {
+
+        throw new Error(
+            "Không tìm thấy hàm canonicalizeCertificate()."
+        );
+
+    }
+
+
+    const canonicalJson =
+        canonicalizeCertificate(
+            certificateData
+        );
+
+
+    addStep(
+        "Đã tạo Canonical JSON",
+        "success"
+    );
+
+
+    /*
+        5. SHA-256
+    */
+
+    addStep(
+        "Đang tính SHA-256..."
+    );
+
+
+    if (
+        typeof sha256 !== "function"
+    ) {
+
+        throw new Error(
+            "Không tìm thấy hàm sha256()."
+        );
+
+    }
+
+
+    const localHash =
+        await sha256(
+            canonicalJson
+        );
+
+
+    setText(
+        "displayHash",
+        "0x" + localHash
+    );
+
+
+    addStep(
+        "SHA-256 đã được tính: " +
+        localHash,
+        "success"
+    );
+
+
+    /*
+        6. KẾT NỐI BLOCKCHAIN
+    */
+
+    addStep(
+        "Đang truy vấn Smart Contract..."
+    );
+
+
+    if (
+        typeof verifyCertificateOnBlockchain
+        !== "function"
+    ) {
+
+        throw new Error(
+            "Không tìm thấy hàm verifyCertificateOnBlockchain()."
+        );
+
+    }
+
+
+    const blockchainData =
+        await verifyCertificateOnBlockchain(
+            certId,
+            localHash
+        );
+
+
+    /*
+        7. CERTIFICATE KHÔNG TỒN TẠI
+    */
+
+    if (!blockchainData.exists) {
+
+        setText(
+            "displayOnChainHash",
+            "Không tồn tại"
+        );
+
+
+        setText(
+            "displayIssuerWallet",
+            "Không tồn tại"
+        );
+
+
+        setText(
+            "displayIssuedAt",
+            "Không tồn tại"
+        );
+
+
+        setText(
+            "displayRevoked",
+            "Không tồn tại"
+        );
+
+
+        addStep(
+            "Certificate không tồn tại trên Blockchain.",
+            "error"
+        );
+
+
+        showStatus(
+            "error",
+            "❌ CERTIFICATE KHÔNG TỒN TẠI TRÊN BLOCKCHAIN"
+        );
+
+
+        showResult();
+
+        return;
+
+    }
+
+
+    /*
+        8. HIỂN THỊ ON-CHAIN HASH
+    */
+
+    const onChainHash =
+        blockchainData.certificateHash
+        || blockchainData.hash
+        || "Không đọc được";
+
+
+    setText(
+        "displayOnChainHash",
+        onChainHash
+    );
+
+
+    /*
+        9. ISSUER
+    */
+
+    setText(
+        "displayIssuerWallet",
+        blockchainData.issuer
+    );
+
+
+    /*
+        10. TIMESTAMP
+    */
+
+    let issuedAtText =
+        "—";
+
+
+    if (
+        blockchainData.issuedAt
+    ) {
+
+        try {
+
+            const timestamp =
+                Number(
+                    blockchainData.issuedAt
+                );
+
+
+            if (timestamp > 0) {
+
+                issuedAtText =
+                    new Date(
+                        timestamp * 1000
+                    ).toLocaleString(
+                        "vi-VN"
+                    );
+
+            }
+
+        }
+
+        catch {
+
+            issuedAtText =
+                String(
+                    blockchainData.issuedAt
+                );
+
+        }
+
+    }
+
+
+    setText(
+        "displayIssuedAt",
+        issuedAtText
+    );
+
+
+    /*
+        11. REVOKED
+    */
+
+    if (blockchainData.revoked) {
+
+        setText(
+            "displayRevoked",
+            "⚠️ ĐÃ THU HỒI"
+        );
+
+
+        document
+            .getElementById(
+                "displayRevoked"
+            )
+            .className =
+                "font-bold text-rose-400";
+
+
+    } else {
+
+        setText(
+            "displayRevoked",
+            "✅ CHƯA THU HỒI"
+        );
+
+
+        document
+            .getElementById(
+                "displayRevoked"
+            )
+            .className =
+                "font-bold text-emerald-400";
+
+    }
+
+
+    addStep(
+        "Certificate tồn tại trên Blockchain.",
+        "success"
+    );
+
+
+    /*
+        12. HASH MATCH
+    */
+
+    if (!blockchainData.hashMatched) {
+
+        addStep(
+            "SHA-256 của file không khớp hash trên Blockchain.",
+            "error"
+        );
+
+
+        showStatus(
+            "error",
+            "❌ HASH KHÔNG KHỚP - DỮ LIỆU CÓ THỂ ĐÃ BỊ THAY ĐỔI"
+        );
+
+
+        showResult();
+
+        return;
+
+    }
+
+
+    addStep(
+        "SHA-256 khớp với hash trên Blockchain.",
+        "success"
+    );
+
+
+    /*
+        13. REVOKE CHECK
+    */
+
+    if (blockchainData.revoked) {
+
+        addStep(
+            "Certificate đã bị cơ quan phát hành thu hồi.",
+            "warning"
+        );
+
+
+        showStatus(
+            "warning",
+            "⚠️ CHỨNG CHỈ ĐÃ BỊ THU HỒI"
+        );
+
+
+        showResult();
+
+        return;
+
+    }
+
+
+    /*
+        14. HOÀN TẤT
+    */
+
+    addStep(
+        "Certificate hợp lệ và chưa bị thu hồi.",
+        "success"
+    );
+
+
+    showStatus(
+        "success",
+        "✅ CHỨNG CHỈ HỢP LỆ"
+    );
+
+
+    showResult();
+
+}
+
+
+
+/* =====================================================
+   HIỂN THỊ STATUS
+===================================================== */
+
+function showStatus(
+    type,
+    message
+) {
+
+    const banner =
+        document.getElementById(
+            "statusBanner"
+        );
+
+
+    if (type === "success") {
+
+        banner.className =
+            "p-5 rounded-xl text-center " +
+            "font-bold text-lg " +
+            "bg-emerald-500/20 " +
+            "border border-emerald-500/40 " +
+            "text-emerald-400";
+
+    }
+
+    else if (type === "warning") {
+
+        banner.className =
+            "p-5 rounded-xl text-center " +
+            "font-bold text-lg " +
+            "bg-amber-500/20 " +
+            "border border-amber-500/40 " +
+            "text-amber-400";
+
+    }
+
+    else {
+
+        banner.className =
+            "p-5 rounded-xl text-center " +
+            "font-bold text-lg " +
+            "bg-rose-500/20 " +
+            "border border-rose-500/40 " +
+            "text-rose-400";
+
+    }
+
+
+    banner.innerText =
+        message;
+
+}
+
+
+
+/* =====================================================
+   CAMERA QR
+===================================================== */
+
+async function toggleCamera() {
+
+    if (isCameraRunning) {
+
+        await stopCamera();
+
+    }
+
+    else {
+
+        await startCamera();
+
+    }
+
+}
+
+
+
+/* =====================================================
+   START CAMERA
+===================================================== */
+
+async function startCamera() {
+
+    const placeholder =
+        document.getElementById(
+            "cameraPlaceholder"
+        );
+
+
+    const wrapper =
+        document.getElementById(
+            "readerWrapper"
+        );
+
+
+    const button =
+        document.getElementById(
+            "cameraButton"
+        );
+
+
+    placeholder.classList.add(
+        "hidden"
+    );
+
+
+    wrapper.classList.remove(
+        "hidden"
+    );
+
+
+    if (!html5QrCode) {
+
+        html5QrCode =
+            new Html5Qrcode(
+                "reader"
+            );
+
+    }
+
+
+    try {
+
+        await html5QrCode.start(
+
+            {
+                facingMode:
+                    "environment"
+            },
+
+            {
+                fps: 10,
+
+                qrbox: {
+                    width: 250,
+                    height: 250
+                }
+
+            },
+
+            async decodedText => {
+
+                await onQrScanned(
+                    decodedText
+                );
+
+            },
+
+            () => {}
+
+        );
+
+
+        isCameraRunning =
+            true;
+
+
+        button.innerText =
+            "⛔ Tắt camera";
+
+
+        button.className =
+            "w-full bg-rose-600 " +
+            "hover:bg-rose-500 " +
+            "py-3 rounded-xl " +
+            "font-bold";
+
+
+    }
+
+    catch (error) {
+
+        console.error(error);
+
+        await stopCamera();
+
+
+        alert(
+            "Không thể mở camera.\n\n" +
+            "Hãy kiểm tra quyền sử dụng camera " +
+            "trên trình duyệt."
+        );
+
+    }
+
+}
+
+
+
+/* =====================================================
+   STOP CAMERA
+===================================================== */
+
+async function stopCamera() {
+
+    if (
+        html5QrCode &&
+        isCameraRunning
+    ) {
+
+        try {
+
+            await html5QrCode.stop();
+
+        }
+
+        catch (error) {
+
+            console.warn(error);
+
+        }
+
+    }
+
+
+    isCameraRunning =
+        false;
+
+
+    document
+        .getElementById(
+            "cameraPlaceholder"
+        )
+        .classList.remove(
+            "hidden"
+        );
+
+
+    document
+        .getElementById(
+            "readerWrapper"
+        )
+        .classList.add(
+            "hidden"
+        );
+
+
+    const button =
+        document.getElementById(
+            "cameraButton"
+        );
+
+
+    button.innerText =
+        "📷 Mở camera";
+
+
+    button.className =
+        "w-full bg-blue-600 " +
+        "hover:bg-blue-500 " +
+        "py-3 rounded-xl " +
+        "font-bold";
+
+}
+
+
+
+/* =====================================================
+   QUÉT QR TỪ ẢNH
+===================================================== */
+
+async function scanQrFromImage(
+    event
+) {
+
+    const file =
+        event.target.files[0];
+
+
+    if (!file) return;
+
+
+    try {
+
+        if (isCameraRunning) {
+
+            await stopCamera();
+
+        }
+
+
+        if (!html5QrCode) {
+
+            html5QrCode =
+                new Html5Qrcode(
+                    "reader"
+                );
+
+        }
+
+
+        const decodedText =
+            await html5QrCode.scanFile(
+                file,
+                true
+            );
+
+
+        await onQrScanned(
+            decodedText
+        );
+
+    }
+
+    catch (error) {
+
+        console.error(error);
+
+
+        showError(
+            "Không đọc được mã QR từ hình ảnh."
+        );
+
+    }
+
+}
+
+
+
+/* =====================================================
+   XỬ LÝ QR
+===================================================== */
+
+async function onQrScanned(
+    decodedText
+) {
+
+    console.log(
+        "QR:",
+        decodedText
+    );
+
+
+    if (isCameraRunning) {
+
+        await stopCamera();
+
+    }
+
+
+    let certId =
+        null;
+
+
+    /*
+        TRƯỜNG HỢP 1:
+        QR là URL
+
+        https://domain.com/verify.html?id=SV2026001
+    */
+
+    try {
+
+        const url =
+            new URL(
+                decodedText
+            );
+
+
+        certId =
+            url.searchParams.get(
+                "id"
+            );
+
+    }
+
+    catch {
+
+        /*
+            Không phải URL.
+        */
+
+    }
+
+
+    /*
+        TRƯỜNG HỢP 2:
+        QR chỉ chứa Certificate ID
+    */
+
+    if (!certId) {
+
+        const text =
+            decodedText.trim();
+
+
+        /*
+            Nếu QR là ID
+        */
+
+        if (
+            /^[A-Za-z0-9_-]+$/
+                .test(text)
+        ) {
+
+            certId =
+                text;
+
+        }
+
+    }
+
+
+    /*
+        Không nhận JSON trực tiếp từ QR
+    */
+
+    if (!certId) {
+
+        showError(
+            "QR không chứa Certificate ID hợp lệ."
+        );
+
+        return;
+
+    }
+
+
+    /*
+        Điền ID vào ô
+    */
+
+    document
+        .getElementById(
+            "certIdInput"
+        )
+        .value =
+            certId;
+
+
+    /*
+        Xác minh
+    */
+
+    await verifyById();
+
+}
+
+
+
+/* =====================================================
+   ĐỌC ID TRÊN URL
+===================================================== */
+
+function getUrlCertificateId() {
+
+    const params =
+        new URLSearchParams(
+            window.location.search
+        );
+
+
+    return params.get(
+        "id"
+    );
+
+}
+
+
+
+/* =====================================================
+   RESET
+===================================================== */
+async function resetVerification() {
+
+    if (isCameraRunning) {
+
+        await stopCamera();
+
+    }
+
+
+    document
+        .getElementById(
+            "result"
+        )
+        .classList.add(
+            "hidden"
+        );
+
+
+    document
+        .getElementById(
+            "certificateInfo"
+        )
+        .classList.remove(
+            "hidden"
+        );
+
+
+    document
+        .getElementById(
+            "blockchainInfo"
+        )
+        .classList.remove(
+            "hidden"
+        );
+
+
+    document
+        .getElementById(
+            "stepList"
+        )
+        .innerHTML = "";
+
+
+    document
+        .getElementById(
+            "certIdInput"
+        )
+        .value = "";
+
+
+    document
+        .getElementById(
+            "jsonFileInput"
+        )
+        .value = "";
+
+
+    document
+        .getElementById(
+            "qrFileInput"
+        )
+        .value = "";
+
+
+    document
+        .getElementById(
+            "rawJson"
+        )
+        .innerText = "";
+
+}
+
+
+
+/* =====================================================
+   TỰ ĐỘNG XÁC MINH KHI QR MỞ URL
+===================================================== */
+
+window.addEventListener(
+    "DOMContentLoaded",
+    async () => {
+
+        const certId =
+            getUrlCertificateId();
+
+
+        if (!certId) {
+
+            return;
+
+        }
+
+
+        document
+            .getElementById(
+                "certIdInput"
+            )
+            .value =
+                certId;
+
+
+        await verifyById();
+    }
+);
+
+</script>
+
+</body>
+</html>

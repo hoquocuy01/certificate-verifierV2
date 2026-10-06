@@ -1,0 +1,11 @@
+test/
+config/
+
+index.html
+*.yml
+*.config.js
+.babelrc
+.nvmrc
+.github/
+
+.idea

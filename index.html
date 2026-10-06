@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Blockchain Certificate</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            color: #e2e8f0;
+            background:
+                radial-gradient(circle at 20% 20%, #172554 0, transparent 35%),
+                radial-gradient(circle at 80% 30%, #312e81 0, transparent 35%),
+                #020617;
+            overflow-x: hidden;
+        }
+
+        /* GRID */
+        .grid-bg {
+            position: fixed;
+            inset: 0;
+            z-index: -2;
+
+            background-image:
+                linear-gradient(rgba(59,130,246,.08) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(59,130,246,.08) 1px, transparent 1px);
+
+            background-size: 45px 45px;
+
+            animation: grid 12s linear infinite;
+        }
+
+        @keyframes grid {
+            from {
+                transform: translateY(0);
+            }
+
+            to {
+                transform: translateY(45px);
+            }
+        }
+
+        /* GLOW */
+        .glow {
+            position: fixed;
+            width: 400px;
+            height: 400px;
+            border-radius: 50%;
+            filter: blur(120px);
+            opacity: .25;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .glow-1 {
+            background: #06b6d4;
+            top: -150px;
+            left: -100px;
+        }
+
+        .glow-2 {
+            background: #7c3aed;
+            right: -150px;
+            bottom: -100px;
+        }
+
+        /* LOGO */
+        .logo {
+            box-shadow:
+                0 0 25px rgba(59,130,246,.35);
+        }
+
+        /* CARD */
+        .card {
+            background: rgba(15,23,42,.72);
+            border: 1px solid rgba(96,165,250,.18);
+            backdrop-filter: blur(15px);
+
+            transition: .3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(56,189,248,.5);
+
+            box-shadow:
+                0 0 35px rgba(14,165,233,.15);
+        }
+
+        /* GRADIENT TEXT */
+        .gradient {
+            background:
+                linear-gradient(
+                    90deg,
+                    #22d3ee,
+                    #60a5fa,
+                    #a78bfa,
+                    #22d3ee
+                );
+
+            background-size: 250%;
+
+            -webkit-background-clip: text;
+            background-clip: text;
+
+            color: transparent;
+
+            animation: gradient 5s linear infinite;
+        }
+
+        @keyframes gradient {
+            0% {
+                background-position: 0%;
+            }
+
+            100% {
+                background-position: 250%;
+            }
+        }
+
+        /* CORE */
+        .core {
+            width: 130px;
+            height: 130px;
+            margin: auto;
+            position: relative;
+        }
+
+        .ring {
+            position: absolute;
+            inset: 0;
+
+            border-radius: 50%;
+
+            border: 1px solid #38bdf8;
+
+            box-shadow:
+                0 0 20px rgba(56,189,248,.25);
+
+            animation: rotate 8s linear infinite;
+        }
+
+        .ring:nth-child(2) {
+            inset: 15px;
+            border-color: #818cf8;
+            animation-direction: reverse;
+            animation-duration: 5s;
+        }
+
+        .ring:nth-child(3) {
+            inset: 30px;
+            border-color: #c084fc;
+            animation-duration: 3s;
+        }
+
+        .core-center {
+            position: absolute;
+            inset: 45px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 50%;
+
+            background: #0f172a;
+            border: 1px solid #38bdf8;
+
+            box-shadow:
+                0 0 30px rgba(56,189,248,.4);
+
+            font-size: 22px;
+        }
+
+        @keyframes rotate {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* MODAL */
+        .modal {
+            background: rgba(2,6,23,.78);
+            backdrop-filter: blur(15px);
+        }
+
+        .modal-card {
+            background:
+                linear-gradient(
+                    145deg,
+                    rgba(15,23,42,.98),
+                    rgba(17,24,39,.96)
+                );
+
+            border: 1px solid rgba(56,189,248,.3);
+
+            box-shadow:
+                0 0 70px rgba(14,165,233,.18);
+        }
+
+        .online {
+            color: #4ade80;
+        }
+    </style>
+</head>
+
+
+<body>
+
+<div class="grid-bg"></div>
+
+<div class="glow glow-1"></div>
+<div class="glow glow-2"></div>
+
+
+<!-- NAVBAR -->
+<nav class="fixed top-0 left-0 right-0 z-40
+            bg-slate-950/70
+            backdrop-blur-xl
+            border-b border-slate-800">
+
+    <div class="max-w-5xl mx-auto
+                px-5 py-4
+                flex justify-between items-center">
+
+        <div class="flex items-center gap-3">
+
+            <div class="logo
+                        w-10 h-10
+                        rounded-xl
+                        bg-gradient-to-br
+                        from-cyan-500
+                        to-blue-600
+                        flex items-center justify-center
+                        text-xl">
+
+                ⛓️
+
+            </div>
+
+            <div>
+
+                <div class="font-black tracking-wider">
+                    BLOCKCHAIN
+                </div>
+
+                <div class="text-[9px]
+                            text-slate-500
+                            tracking-[.25em]">
+
+                    CERTIFICATE SYSTEM
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="flex items-center gap-2
+                    text-[10px]
+                    font-bold
+                    text-green-400">
+
+            <span>●</span>
+
+            ONLINE
+
+        </div>
+
+    </div>
+
+</nav>
+
+
+<!-- MAIN -->
+<main class="min-h-screen
+            flex items-center
+            justify-center
+            px-5 pt-24 pb-12">
+
+    <div class="w-full max-w-4xl text-center">
+
+
+        <!-- CORE -->
+        <div class="core mb-8">
+
+            <div class="ring"></div>
+            <div class="ring"></div>
+            <div class="ring"></div>
+
+            <div class="core-center">
+                ⛓️
+            </div>
+
+        </div>
+
+
+        <!-- LABEL -->
+        <div class="inline-block
+                    px-4 py-2
+                    rounded-full
+                    bg-cyan-950/50
+                    border border-cyan-800/50
+                    text-cyan-400
+                    text-[9px]
+                    font-bold
+                    tracking-[.25em]">
+
+            DECENTRALIZED CERTIFICATE PLATFORM
+
+        </div>
+
+
+        <!-- TITLE -->
+        <h1 class="gradient
+                   text-4xl
+                   sm:text-6xl
+                   font-black
+                   mt-5
+                   leading-tight">
+
+            BLOCKCHAIN
+            <br>
+            CERTIFICATE
+
+        </h1>
+
+
+        <p class="max-w-xl
+                  mx-auto
+                  mt-5
+                  text-sm
+                  sm:text-base
+                  text-slate-400
+                  leading-7">
+
+            Hệ thống phát hành và xác minh chứng chỉ
+            bằng Blockchain, SHA-256 và QR Code.
+            <br>
+            Dữ liệu cá nhân không được lưu trực tiếp trên Blockchain.
+
+        </p>
+
+
+        <!-- ACTIONS -->
+        <div class="grid
+                    sm:grid-cols-2
+                    gap-4
+                    max-w-2xl
+                    mx-auto
+                    mt-10">
+
+
+            <!-- VERIFY -->
+            <a href="verify.html"
+               class="card rounded-2xl
+                      p-6
+                      text-left
+                      group">
+
+                <div class="flex items-center gap-4">
+
+                    <div class="w-14 h-14
+                                rounded-xl
+                                bg-cyan-950
+                                border border-cyan-800
+                                flex items-center
+                                justify-center
+                                text-2xl
+                                group-hover:scale-110
+                                transition">
+
+                        🔎
+
+                    </div>
+
+                    <div>
+
+                        <div class="text-[9px]
+                                    text-cyan-400
+                                    font-bold
+                                    tracking-widest">
+
+                            PUBLIC VERIFIER
+
+                        </div>
+
+                        <h2 class="text-lg
+                                   font-black
+                                   mt-1">
+
+                            Xác minh chứng chỉ
+
+                        </h2>
+
+                        <p class="text-xs
+                                  text-slate-500
+                                  mt-1">
+
+                            QR • JSON • Certificate ID
+
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </a>
+
+
+            <!-- ADMIN -->
+            <a href="admin.html"
+               class="card rounded-2xl
+                      p-6
+                      text-left
+                      group">
+
+                <div class="flex items-center gap-4">
+
+                    <div class="w-14 h-14
+                                rounded-xl
+                                bg-purple-950
+                                border border-purple-800
+                                flex items-center
+                                justify-center
+                                text-2xl
+                                group-hover:scale-110
+                                transition">
+
+                        🔐
+
+                    </div>
+
+                    <div>
+
+                        <div class="text-[9px]
+                                    text-purple-400
+                                    font-bold
+                                    tracking-widest">
+
+                            ADMINISTRATOR
+
+                        </div>
+
+                        <h2 class="text-lg
+                                   font-black
+                                   mt-1">
+
+                            Phát hành chứng chỉ
+
+                        </h2>
+
+                        <p class="text-xs
+                                  text-slate-500
+                                  mt-1">
+
+                            Issue • Hash • QR • Revoke
+
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </a>
+
+        </div>
+
+
+        <!-- BOTTOM INFO -->
+        <div class="mt-8
+                    text-[9px]
+                    text-slate-600
+                    tracking-[.25em]">
+
+            SECURE • DECENTRALIZED • VERIFIABLE
+
+        </div>
+
+    </div>
+
+</main>
+
+
+
+<!-- THÔNG BÁO -->
+<div id="noticeModal"
+     class="modal fixed inset-0 z-50
+            flex items-center justify-center
+            p-5">
+
+
+    <div class="modal-card
+                w-full max-w-md
+                rounded-3xl
+                p-7
+                text-center">
+
+
+        <!-- ICON -->
+        <div class="w-16 h-16
+                    mx-auto
+                    rounded-2xl
+                    bg-cyan-950
+                    border border-cyan-700
+                    flex items-center justify-center
+                    text-3xl
+                    shadow-[0_0_30px_rgba(14,165,233,.25)]">
+
+            ⚡
+
+        </div>
+
+
+        <!-- TITLE -->
+        <div class="text-[9px]
+                    text-cyan-400
+                    font-bold
+                    tracking-[.3em]
+                    mt-5">
+
+            SYSTEM MESSAGE
+
+        </div>
+
+
+        <h2 class="text-xl
+                   sm:text-2xl
+                   font-black
+                   mt-2
+                   gradient">
+
+            THÔNG BÁO TỪ THIÊN ĐẠO
+
+        </h2>
+
+
+        <div class="h-px
+                    bg-gradient-to-r
+                    from-transparent
+                    via-cyan-500
+                    to-transparent
+                    my-5">
+        </div>
+
+
+        <h3 class="text-lg
+                   font-black
+                   text-white">
+
+            HỆ THỐNG XÁC THỰC CHỨNG CHỈ
+
+        </h3>
+
+
+        <p class="text-sm
+                  text-slate-400
+                  leading-6
+                  mt-4">
+
+            Chào mừng bạn đến với hệ thống
+            phát hành và xác minh chứng chỉ
+            sử dụng công nghệ Blockchain.
+
+        </p>
+
+
+        <!-- STATUS -->
+        <div class="mt-5
+                    inline-flex
+                    items-center gap-2
+                    px-4 py-2
+                    rounded-full
+                    bg-green-950/50
+                    border border-green-800/50
+                    text-green-400
+                    text-[9px]
+                    font-bold
+                    tracking-widest">
+
+            <span>●</span>
+
+            SYSTEM ONLINE
+
+        </div>
+
+
+        <!-- BUTTON -->
+        <button onclick="closeNotice()"
+                class="w-full
+                       mt-6
+                       py-4
+                       rounded-xl
+                       bg-gradient-to-r
+                       from-cyan-500
+                       to-blue-600
+                       hover:from-cyan-400
+                       hover:to-blue-500
+                       text-white
+                       font-black
+                       transition
+                       shadow-lg
+                       shadow-cyan-500/20">
+
+            🏠 Vào Trang Chủ
+
+        </button>
+
+
+        <a href="https://mail.google.com/mail/?view=cm&fs=1&to=hoquocuy01@gmail.com"
+           target="_blank"
+           rel="noopener noreferrer"
+           class="block mt-4
+                  text-xs
+                  text-slate-500
+                  hover:text-cyan-400
+                  transition">
+
+            ✉ Liên hệ hỗ trợ
+
+        </a>
+
+
+        <div class="mt-6
+                    text-[8px]
+                    text-slate-600
+                    tracking-widest">
+
+            SECURE • VERIFIED • BLOCKCHAIN
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<script>
+
+    function closeNotice() {
+
+        document
+            .getElementById("noticeModal")
+            .style.display = "none";
+
+    }
+
+
+    document.addEventListener(
+        "keydown",
+        function(e) {
+
+            if (e.key === "Escape") {
+
+                closeNotice();
+
+            }
+
+        }
+    );
+
+
+    document
+        .getElementById("noticeModal")
+        .addEventListener(
+            "click",
+            function(e) {
+
+                if (e.target === this) {
+
+                    closeNotice();
+
+                }
+
+            }
+        );
+
+</script>
+
+
+</body>
+</html>

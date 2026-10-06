@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Issuance & Management Panel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Ethers.js v6 UMD -->
+    <script src="https://cdn.jsdelivr.net/npm/ethers@6.15.0/dist/ethers.umd.min.js"></script>
+    <!-- QRCode.js Library -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+
+    <!-- Project Custom Libraries -->
+    <script src="./js/config.js"></script>
+    <script src="./js/hash.js"></script>
+    <script src="./js/certificate.js"></script>
+    <script src="./js/blockchain.js"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen font-sans">
+    <div class="max-w-4xl mx-auto px-4 py-10">
+        <h1 class="text-3xl font-extrabold text-amber-400 text-center tracking-tight">
+            🎓 Admin Certificate Management
+        </h1>
+        <p class="text-center text-slate-400 mt-1">
+            Hệ thống phát hành và quản lý bằng cấp trên nền tảng Blockchain
+        </p>
+
+        <!-- Block 1: Connect Wallet -->
+        <div class="mt-8 bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl">
+            <button type="button" onclick="handleConnectWallet()" 
+                    class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 font-bold text-white rounded-xl transition-all duration-200">
+                🦊 Kết nối Ví MetaMask
+            </button>
+            <p id="walletAddress" class="text-xs text-emerald-400 mt-2 font-mono break-all text-center"></p>
+        </div>
+
+        <!-- Block 2: Issue Certificate Form -->
+        <div class="mt-8 bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl space-y-4">
+            <h2 class="text-xl font-bold text-slate-200 border-b border-slate-800 pb-2">
+                1. Khai báo thông tin văn bằng
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm text-slate-400 mb-1">Mã Bằng (Certificate ID)</label>
+                    <input id="certId" type="text" placeholder="SV2026001" class="w-full bg-slate-950 border border-slate-800 p-3 rounded-xl focus:border-indigo-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm text-slate-400 mb-1">Họ và Tên Sinh Viên</label>
+                    <input id="studentName" type="text" placeholder="Nguyen Van A" class="w-full bg-slate-950 border border-slate-800 p-3 rounded-xl focus:border-indigo-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm text-slate-400 mb-1">Tên Tốt Nghiệp / Xếp Loại</label>
+                    <input id="degreeTitle" type="text" placeholder="Cử nhân Công nghệ Thông tin" class="w-full bg-slate-950 border border-slate-800 p-3 rounded-xl focus:border-indigo-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm text-slate-400 mb-1">Đơn vị Cấp Bằng</label>
+                    <input id="issuerName" type="text" placeholder="Đại học Hai Phong" class="w-full bg-slate-950 border border-slate-800 p-3 rounded-xl focus:border-indigo-500 outline-none">
+                </div>
+            </div>
+
+            <button onclick="handleGenerateJson()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 font-bold text-white rounded-xl transition-all">
+                📄 Tạo JSON & Tính SHA-256 Hash
+            </button>
+
+            <div class="bg-slate-950 p-4 rounded-xl border border-slate-800">
+                <p class="text-xs text-slate-400 font-mono">SHA-256 Calculated Hash:</p>
+                <p id="hashOutput" class="text-xs text-emerald-400 font-mono break-all mt-1">---</p>
+            </div>
+
+            <!-- Block 3: Issue On-chain -->
+            <h2 class="text-xl font-bold text-slate-200 border-b border-slate-800 pb-2 pt-4">
+                2. Ghi dữ liệu On-Chain
+            </h2>
+            <button id="btnIssueBlockchain" disabled onclick="handleIssueBlockchain()" 
+                    class="w-full py-3 bg-blue-600 hover:bg-blue-500 disabled:bg-slate-800 disabled:text-slate-600 font-bold text-white rounded-xl transition-all">
+                ⛓️ Phát hành Hash lên Blockchain
+            </button>
+            <p id="txHash" class="text-xs text-sky-400 font-mono break-all"></p>
+
+            <!-- Block 4: QR Generator -->
+            <h2 class="text-xl font-bold text-slate-200 border-b border-slate-800 pb-2 pt-4">
+                3. Tạo Mã QR tra cứu
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <button onclick="handleGenerateQR()" class="w-full py-3 bg-purple-600 hover:bg-purple-500 font-bold text-white rounded-xl transition-all">
+                    📱 Tạo Mã QR Verify
+                </button>
+                <button id="btnDownloadQR" disabled onclick="handleDownloadQR()" class="w-full py-3 bg-fuchsia-600 hover:bg-fuchsia-500 disabled:bg-slate-800 disabled:text-slate-600 font-bold text-white rounded-xl transition-all">
+                    📥 Tải Ảnh QR Code
+                </button>
+            </div>
+            <div id="qrcode" class="flex justify-center mt-4 bg-white p-4 rounded-xl max-w-[230px] mx-auto min-h-[230px] items-center"></div>
+            <p id="qrUrlDisplay" class="text-xs text-slate-400 font-mono break-all text-center mt-2"></p>
+        </div>
+
+        <!-- Block 5: Revoke Certificate -->
+        <div class="mt-8 bg-slate-900 border border-red-900/30 p-6 rounded-2xl shadow-xl space-y-4">
+            <h2 class="text-xl font-bold text-red-400 border-b border-slate-800 pb-2">
+                🚫 Thu Hồi Văn Bằng (Revoke)
+            </h2>
+            <input id="revokeCertId" type="text" placeholder="Nhập Certificate ID cần thu hồi..." class="w-full bg-slate-950 border border-slate-800 p-3 rounded-xl focus:border-red-500 outline-none">
+            <button onclick="handleRevoke()" class="w-full py-3 bg-red-600 hover:bg-red-500 font-bold text-white rounded-xl transition-all">
+                ⚠️ Xác nhận Thu Hồi Bằng On-Chain
+            </button>
+            <p id="revokeTxHash" class="text-xs text-red-400 font-mono break-all"></p>
+        </div>
+    </div>
+
+    <script>
+        let generatedCertData = null;
+        let generatedCertHash = null;
+
+        async function handleConnectWallet() {
+            try {
+                const addr = await connectWallet();
+                document.getElementById("walletAddress").innerText = "Ví kết nối: " + addr;
+            } catch (err) {
+                alert(err.message);
+            }
+        }
+
+        async function handleGenerateJson() {
+            const name = document.getElementById("studentName").value.trim();
+            const id = document.getElementById("certId").value.trim();
+            const degree = document.getElementById("degreeTitle").value.trim();
+            const issuer = document.getElementById("issuerName").value.trim();
+
+            if (!name || !id || !degree || !issuer) {
+                alert("Vui lòng điền đầy đủ tất cả các trường dữ liệu!");
+                return;
+            }
+
+            const issueDate = new Date().toISOString();
+            generatedCertData = createCertificateData({
+                certId: id,
+                studentName: name,
+                degree: degree,
+                issuer: issuer,
+                issueDate: issueDate
+            });
+
+            const canonicalJson = canonicalizeCertificate(generatedCertData);
+            generatedCertHash = await sha256(canonicalJson);
+
+            document.getElementById("hashOutput").innerText = generatedCertHash;
+
+            // Kích hoạt tự động tải xuống file JSON chứa dữ liệu bằng
+            const blob = new Blob([JSON.stringify(generatedCertData, null, 2)], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = id + ".json";
+            a.click();
+            URL.revokeObjectURL(url);
+
+            document.getElementById("btnIssueBlockchain").disabled = false;
+        }
+
+        async function handleIssueBlockchain() {
+            if (!generatedCertData || !generatedCertHash) {
+                alert("Vui lòng tạo JSON trước!");
+                return;
+            }
+            try {
+                const tx = await issueCertificateOnBlockchain(generatedCertData.certificateId, generatedCertHash);
+                document.getElementById("txHash").innerText = "Tx Hash: " + tx;
+                alert("Phát hành văn bằng thành công lên Blockchain!");
+            } catch (err) {
+                console.error(err);
+                alert("Lỗi phát hành: " + (err.reason || err.message));
+            }
+        }
+
+        function handleGenerateQR() {
+            if (!generatedCertData) {
+                alert("Vui lòng khởi tạo văn bằng trước!");
+                return;
+            }
+            const certId = generatedCertData.certificateId;
+            const verifyUrl = window.location.origin + window.location.pathname.replace("admin.html", "") + "verify.html?id=" + encodeURIComponent(certId);
+
+            const qrContainer = document.getElementById("qrcode");
+            qrContainer.innerHTML = "";
+            new QRCode(qrContainer, {
+                text: verifyUrl,
+                width: 200,
+                height: 200
+            });
+            document.getElementById("qrUrlDisplay").innerText = verifyUrl;
+            
+            // Kích hoạt nút Tải Mã QR
+            document.getElementById("btnDownloadQR").disabled = false;
+        }
+
+        function handleDownloadQR() {
+            if (!generatedCertData) {
+                alert("Không tìm thấy thông tin văn bằng!");
+                return;
+            }
+
+            const qrContainer = document.getElementById("qrcode");
+            const imgElement = qrContainer.querySelector("img");
+            const canvasElement = qrContainer.querySelector("canvas");
+            
+            let imageSrc = "";
+
+            if (imgElement && imgElement.src) {
+                imageSrc = imgElement.src;
+            } else if (canvasElement) {
+                imageSrc = canvasElement.toDataURL("image/png");
+            } else {
+                alert("Vui lòng ấn 'Tạo Mã QR Verify' trước!");
+                return;
+            }
+
+            // Đặt tên file là QR + Certificate ID (Ví dụ: QRSV2026001.png)
+            const fileName = "QR" + generatedCertData.certificateId + ".png";
+
+            const downloadLink = document.createElement("a");
+            downloadLink.href = imageSrc;
+            downloadLink.download = fileName;
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+        }
+
+        async function handleRevoke() {
+            const certId = document.getElementById("revokeCertId").value.trim();
+            if (!certId) {
+                alert("Nhập Certificate ID!");
+                return;
+            }
+            if (!confirm(`Bạn có chắc chắn muốn THU HỒI bằng có mã ID: ${certId}?`)) return;
+
+            try {
+                const tx = await revokeCertificateOnBlockchain(certId);
+                document.getElementById("revokeTxHash").innerText = "Revoke Tx Hash: " + tx;
+                alert("Đã thu hồi thành công văn bằng!");
+            } catch (err) {
+                console.error(err);
+                alert("Lỗi thu hồi: " + (err.reason || err.message));
+            }
+        }
+    </script>
+</body>
+</html>

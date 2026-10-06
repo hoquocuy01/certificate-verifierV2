@@ -1,0 +1,49 @@
+import { describe, it, expect } from 'vitest';
+import FIXTURES from '../fixtures';
+import { FakeFetch } from './mocks/FakeFetch';
+import { Certificate } from '../../dist/verifier-es';
+
+// @ts-expect-error we just mock the thing
+global.fetch = FakeFetch;
+
+describe('verifier build test suite', function () {
+  it('throws a deprecation error with a v1 certificate', async function () {
+    const certificate = new Certificate(FIXTURES.TestnetV1Valid);
+    await expect(async () => {
+      await certificate.init();
+    }).rejects.toThrow('Verification of v1 certificates is not supported by this component. ' +
+      'See the python cert-verifier for v1.1 verification ' +
+      'or the npm package cert-verifier-js-v1-legacy for v1.2 ' +
+      '(https://www.npmjs.com/package/@blockcerts/cert-verifier-js-v1-legacy)');
+  });
+
+  it('works as expected with a v2 certificate', async function () {
+    const certificate = new Certificate(FIXTURES.MainnetV2Valid);
+    await certificate.init();
+    const result = await certificate.verify();
+    if (result.status === 'failure') {
+      console.log(result.message);
+    }
+    expect(result.message).toEqual({
+      label: 'Verified',
+      description: 'This is a valid ${chain} certificate.',
+      linkText: 'View transaction link'
+    });
+    expect(result.status).toBe('success');
+  }, 30000);
+
+  it('works as expected with a v3 certificate', async function () {
+    const certificate = new Certificate(FIXTURES.BlockcertsV3);
+    await certificate.init();
+    const result = await certificate.verify();
+    if (result.status === 'failure') {
+      console.log(result.message);
+    }
+    expect(result.message).toEqual({
+      label: 'Verified',
+      description: 'This is a valid ${chain} certificate.',
+      linkText: 'View transaction link'
+    });
+    expect(result.status).toBe('success');
+  }, 30000);
+});
